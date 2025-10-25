@@ -2,10 +2,10 @@
 pragma solidity ^0.8.13;
 
 import {Script} from "forge-std/Script.sol";
-import {CoffeShop} from "../src/CoffeShop.sol";
+import {EVVMCafe} from "../src/EVVMCafe.sol";
 
-contract CoffeShopScript is Script {
-    CoffeShop public coffeShop;
+contract EVVMCafeScript is Script {
+    EVVMCafe public coffeShop;
 
     address constant evvmAddress = 0xF817e9ad82B4a19F00dA7A248D9e556Ba96e6366;
 
@@ -14,7 +14,7 @@ contract CoffeShopScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        coffeShop = new CoffeShop(evvmAddress, msg.sender);
+        coffeShop = new EVVMCafe(evvmAddress, msg.sender);
 
         vm.stopBroadcast();
     }

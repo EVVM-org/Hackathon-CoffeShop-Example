@@ -5,7 +5,7 @@ import {IEvvm} from "@evvm/testnet-contracts/interfaces/IEvvm.sol";
 import {SignatureRecover} from "@evvm/testnet-contracts/library/SignatureRecover.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract CoffeShop {
+contract EVVMCafe {
     error InvalidSignature();
     error NonceAlreadyUsed();
 
@@ -119,13 +119,13 @@ contract CoffeShop {
          */
         if (IEvvm(evvmAddress).isAddressStaker(address(this))) {
             IEvvm(evvmAddress).caPay(
-                address(this),
+                msg.sender,
                 ETHER_ADDRESS,
                 priorityFee_EVVM
             );
 
             IEvvm(evvmAddress).caPay(
-                address(this),
+                msg.sender,
                 PRINCIPAL_TOKEN_ADDRESS,
                 IEvvm(evvmAddress).getRewardAmount() / 2
             );
