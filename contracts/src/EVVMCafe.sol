@@ -265,6 +265,10 @@ contract EVVMCafe {
             );
     }
 
+    function getEvvmAddress() external view returns (address) {
+        return evvmAddress;
+    }
+
     function getAmountOfEtherInShop() external view returns (uint256) {
         return IEvvm(evvmAddress).getBalance(address(this), ETHER_ADDRESS);
     }
