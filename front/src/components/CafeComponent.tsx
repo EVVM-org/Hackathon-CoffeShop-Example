@@ -7,7 +7,6 @@ import { getWalletClient, readContract } from "@wagmi/core";
 
 // Custom UI components for form inputs and displays
 
-
 // Utility functions for wallet and transaction handling
 import { getAccountWithRetry } from "@/utils/getAccountWithRetry";
 
@@ -19,9 +18,6 @@ import {
   GenericSignatureBuilder,
 } from "@evvm/viem-signature-library";
 
-// Function to execute the payment transaction
-import { executePay } from "@/utils/useEVVMTransactionExecuter";
-
 import address from "@/constant/address.json";
 
 import EVVMCafe from "@/constant/EVVMCafe.json";
@@ -30,6 +26,7 @@ import styles from "./CafeComponent.module.css";
 import { formatEther } from "viem/utils";
 import { generateRandomNumber } from "@/utils/mersenneTwister";
 import { Ticket } from "./Ticket";
+import { VisualExecution } from "./VisualExecution";
 
 // Component props interface - defines what data this component needs
 
@@ -39,6 +36,19 @@ type CafeData = {
   totalPrice: bigint;
   nonce: bigint;
   signature: string;
+};
+
+type orderCoffeeInputData = {
+  clientAddress: `0x${string}`;
+  coffeeType: string;
+  quantity: bigint;
+  totalPrice: bigint;
+  nonce: bigint;
+  signature: string;
+  priorityFee_EVVM: bigint;
+  nonce_EVVM: bigint;
+  priorityFlag_EVVM: boolean;
+  signature_EVVM: string;
 };
 
 const coffePriceMap: { [key: string]: bigint } = {
@@ -54,14 +64,16 @@ export const CafeComponent = () => {
     null
   ); // Stores the coffee order receipt
   const [payReceipt, setPayReceipt] = React.useState<PayInputData | null>(null); // Stores the payment receipt
+  const [orderCoffeeData, setOrderCoffeeData] =
+    React.useState<orderCoffeeInputData | null>(null); // Stores the order coffee data for contract call
   const [coffeeType, setCoffeeType] = React.useState<string>("Fisher Espresso"); // Selected coffee type
   const [quantityCoffee, setQuantityCoffee] = React.useState<number>(1); // Quantity of coffee
+  const [syncNonce, setSyncNonce] = React.useState<bigint | null>(null); // Auto-fetched nonce value
 
-  const [confirmingOrder, setConfirmingOrder] = React.useState<boolean>(false); // Order confirmation state
   const [priorityFlagOnEvvm, setPriorityFlagOnEvvm] =
     React.useState<string>("false");
 
-  const [syncNonce, setSyncNonce] = React.useState<bigint | null>(null); // Auto-fetched nonce value
+  const [progressHistory, setProgressHistory] = React.useState<string>("begin"); // Order confirmation state
 
   const readEVVMId = async (): Promise<bigint | undefined> => {
     try {
@@ -201,6 +213,21 @@ export const CafeComponent = () => {
                 executor: formData.executor as `0x${string}`,
                 signature: paySignatire,
               });
+              // Prepare the order coffee data for contract call
+              setOrderCoffeeData({
+                clientAddress: walletData.address as `0x${string}`,
+                coffeeType: coffeShopFormData.coffeeType,
+                quantity: coffeShopFormData.quantity,
+                totalPrice: coffeShopFormData.totalPrice,
+                nonce: coffeShopFormData.nonce,
+                signature: signature,
+                priorityFee_EVVM: BigInt(formData.priorityFee),
+                nonce_EVVM: BigInt(formData.nonce),
+                priorityFlag_EVVM: formData.priorityFlag,
+                signature_EVVM: paySignatire,
+              });
+
+              setProgressHistory("signed");
             });
         });
     });
@@ -208,7 +235,7 @@ export const CafeComponent = () => {
 
   return (
     <div>
-      {!confirmingOrder && (
+      {progressHistory === "begin" && (
         <>
           <p>Select Coffee Type:</p>
           <select
@@ -241,69 +268,87 @@ export const CafeComponent = () => {
             ETH
           </p>
 
-          <button onClick={() => setConfirmingOrder(true)}>
+          <button onClick={() => setProgressHistory("confirming")}>
             Confirm Order and Pay
           </button>
         </>
       )}
 
-      <>
-        <p>
-          Price:{" "}
-          {formatEther(coffePriceMap[coffeeType] * BigInt(quantityCoffee))} ETH
-        </p>
+      {progressHistory === "confirming" && (
+        <>
+          <p>
+            Price:{" "}
+            {formatEther(coffePriceMap[coffeeType] * BigInt(quantityCoffee))}{" "}
+            ETH
+          </p>
 
-        <div>
-          Service nonce:{" "}
-          <input type="number" id="nonceInput_Cafe" placeholder="Enter nonce" />
-          <button onClick={generateRandomCoffeeNonce}>
-            Generate Random Nonce
-          </button>
-        </div>
+          <div>
+            Service nonce:{" "}
+            <input
+              type="number"
+              id="nonceInput_Cafe"
+              placeholder="Enter nonce"
+            />
+            <button onClick={generateRandomCoffeeNonce}>
+              Generate Random Nonce
+            </button>
+          </div>
 
-        <p>
-          Priority fee for the transaction:{" "}
-          {formatEther(coffePriceMap[coffeeType] / BigInt(1000))} ETH
-        </p>
+          <p>
+            Priority fee for the transaction:{" "}
+            {formatEther(coffePriceMap[coffeeType] / BigInt(1000))} ETH
+          </p>
 
-        <div>
-          Using{" "}
-          <select
-            value={priorityFlagOnEvvm}
-            onChange={(e) => setPriorityFlagOnEvvm(e.target.value)}
-          >
-            <option value="false">Sync nonces</option>
-            <option value="true">Async nonces</option>
-          </select>
-          {priorityFlagOnEvvm === "false" ? (
-            <div>
-              {syncNonce ? (
-                <p>Current Sync Nonce: {syncNonce?.toString()}</p>
-              ) : (
-                <button onClick={getEvvmSyncNonce}>
-                  Fetch Current Sync Nonce from EVVM
+          <div>
+            Using{" "}
+            <select
+              value={priorityFlagOnEvvm}
+              onChange={(e) => setPriorityFlagOnEvvm(e.target.value)}
+            >
+              <option value="false">Sync nonces</option>
+              <option value="true">Async nonces</option>
+            </select>
+            {priorityFlagOnEvvm === "false" ? (
+              <div>
+                {syncNonce ? (
+                  <p>Current Sync Nonce: {syncNonce?.toString()}</p>
+                ) : (
+                  <button onClick={getEvvmSyncNonce}>
+                    Fetch Current Sync Nonce from EVVM
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div>
+                <input
+                  type="number"
+                  id="nonceAsyncInput_Pay"
+                  placeholder="Enter nonce"
+                />
+                <button onClick={generateRandomPaymentAsyncNonce}>
+                  Generate Random Nonce
                 </button>
-              )}
-            </div>
-          ) : (
-            <div>
-              <input
-                type="number"
-                id="nonceAsyncInput_Pay"
-                placeholder="Enter nonce"
-              />
-              <button onClick={generateRandomPaymentAsyncNonce}>
-                Generate Random Nonce
-              </button>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+          <button onClick={makeSig}>Make Signature and Pay</button>
+        </>
+      )}
+
+      {coffeeReceipt && payReceipt && progressHistory === "signed" && (
+        <>
+          <Ticket coffeeReceipt={coffeeReceipt} payReceipt={payReceipt} />
+
+          <button onClick={() => setProgressHistory("fishing")}>
+            Send this to the fishing spot
+          </button>
+        </>
+      )}
+
+      {orderCoffeeData && progressHistory === "fishing" && (
+        <div>
+          <VisualExecution orderCoffeeInputData={orderCoffeeData} />
         </div>
-      </>
-
-      <button onClick={makeSig}>Make Signature and Pay</button>
-
-      {coffeeReceipt && payReceipt && (
-        <Ticket coffeeReceipt={coffeeReceipt} payReceipt={payReceipt} />
       )}
     </div>
   );
