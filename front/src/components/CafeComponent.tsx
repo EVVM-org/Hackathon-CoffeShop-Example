@@ -20,8 +20,6 @@ import {
 
 import address from "@/constant/address.json";
 
-import EVVMCafe from "@/constant/EVVMCafe.json";
-
 import styles from "./CafeComponent.module.css";
 import { formatEther } from "viem/utils";
 import { generateRandomNumber } from "@/utils/mersenneTwister";
