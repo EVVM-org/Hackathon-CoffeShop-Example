@@ -5,18 +5,6 @@ import {IEvvm} from "@evvm/testnet-contracts/interfaces/IEvvm.sol";
 import {SignatureRecover} from "@evvm/testnet-contracts/library/SignatureRecover.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-/**
- * @title EVVMCafe - A decentralized coffee shop contract
- * @notice This contract allows customers to order coffee using EVVM's payment system
- * @dev Implements signature verification and nonce management for secure transactions
- *
- * Features:
- * - Secure coffee ordering with cryptographic signatures
- * - Payment processing through EVVM virtual blockchain
- * - Fisher incentive system for transaction processing
- * - Owner-controlled fund and reward withdrawal
- * - Replay attack protection using nonces
- */
 contract EVVMCafe {
     // ============================================================================
     // ERRORS
@@ -46,7 +34,7 @@ contract EVVMCafe {
 
     /// @notice Mapping to track used nonces per client address to prevent replay attacks
     /// @dev First key: client address, Second key: nonce, Value: whether nonce is used
-    mapping(address => mapping(uint256 => bool)) public checkAsyncNonce;
+    mapping(address => mapping(uint256 => bool)) checkAsyncNonce;
 
     // ============================================================================
     // CONSTRUCTOR
@@ -248,5 +236,36 @@ contract EVVMCafe {
 
         // Transfer all accumulated ETH to the specified address
         IEvvm(evvmAddress).caPay(to, ETHER_ADDRESS, balance);
+    }
+
+    function isThisNonceUsed(
+        address clientAddress,
+        uint256 nonce
+    ) external view returns (bool) {
+        return checkAsyncNonce[clientAddress][nonce];
+    }
+
+    function getOwnerOfShop() external view returns (address) {
+        return ownerOfShop;
+    }
+
+    function getPrincipalTokenAddress() external pure returns (address) {
+        return PRINCIPAL_TOKEN_ADDRESS;
+    }
+
+    function getEtherAddress() external pure returns (address) {
+        return ETHER_ADDRESS;
+    }
+
+    function getAmountOfPrincipalTokenInShop() external view returns (uint256) {
+        return
+            IEvvm(evvmAddress).getBalance(
+                address(this),
+                PRINCIPAL_TOKEN_ADDRESS
+            );
+    }
+
+    function getAmountOfEtherInShop() external view returns (uint256) {
+        return IEvvm(evvmAddress).getBalance(address(this), ETHER_ADDRESS);
     }
 }
