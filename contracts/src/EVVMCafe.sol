@@ -47,6 +47,7 @@ contract EVVMCafe is StakingServiceHooks {
     // MODIFIERS
     // ============================================================================
 
+    /// @notice Modifier to restrict function access to only the coffee shop owner
     modifier onlyOwner() {
         if (msg.sender != ownerOfShop) revert Unauthorized();
         _;
