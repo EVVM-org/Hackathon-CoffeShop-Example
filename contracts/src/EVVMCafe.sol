@@ -4,8 +4,9 @@ pragma solidity ^0.8.13;
 import {IEvvm} from "@evvm/testnet-contracts/interfaces/IEvvm.sol";
 import {SignatureRecover} from "@evvm/testnet-contracts/library/SignatureRecover.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {StakingServiceHooks} from "@evvm/testnet-contracts/library/StakingServiceHooks.sol";
 
-contract EVVMCafe {
+contract EVVMCafe is StakingServiceHooks {
     // ============================================================================
     // ERRORS
     // ============================================================================
@@ -16,12 +17,18 @@ contract EVVMCafe {
     /// @notice Thrown when attempting to reuse a nonce that has already been consumed
     error NonceAlreadyUsed();
 
+    /// @notice Thrown when an unauthorized action is attempted
+    error Unauthorized();
+
     // ============================================================================
     // STATE VARIABLES
     // ============================================================================
 
     /// @notice Address of the EVVM virtual blockchain contract for payment processing
     address evvmAddress;
+
+    /// @notice Staking service contract address
+    address stakingAddress;
 
     /// @notice Constant representing ETH in the EVVM virtual blockchain (address(0))
     address constant ETHER_ADDRESS = address(0);
@@ -37,6 +44,15 @@ contract EVVMCafe {
     mapping(address => mapping(uint256 => bool)) checkAsyncNonce;
 
     // ============================================================================
+    // MODIFIERS
+    // ============================================================================
+
+    modifier onlyOwner() {
+        if (msg.sender != ownerOfShop) revert Unauthorized();
+        _;
+    }
+
+    // ============================================================================
     // CONSTRUCTOR
     // ============================================================================
 
@@ -45,9 +61,14 @@ contract EVVMCafe {
      * @param _evvmAddress Address of the EVVM virtual blockchain contract for payment processing
      * @param _ownerOfShop Address that will have administrative privileges over the shop
      */
-    constructor(address _evvmAddress, address _ownerOfShop) {
+    constructor(
+        address _evvmAddress,
+        address _stakingAddress,
+        address _ownerOfShop
+    ) StakingServiceHooks(_stakingAddress) {
         evvmAddress = _evvmAddress;
         ownerOfShop = _ownerOfShop;
+        stakingAddress = _stakingAddress;
     }
 
     // ============================================================================
@@ -195,17 +216,48 @@ contract EVVMCafe {
     }
 
     /**
+     * @notice Stakes a specified amount of staking tokens for the coffee shop service
+     * @dev Only callable by the coffee shop owner
+     * @param amountToStake Number of staking tokens to stake
+     */
+    function stake(uint256 amountToStake) external onlyOwner {
+        // a very easy way to make a service stake using the inherited function
+        _makeStakeService(amountToStake);
+        /*
+        but if you want to do it step by step, you can use the following code:
+        Staking(stakingAddress).prepareServiceStaking(amountToStake);
+        Evvm(evvmAddress).caPay(
+            address(stakingAddress),
+            0x0000000000000000000000000000000000000001,
+            Staking(stakingAddress).priceOfStaking() * amountToStake
+        );
+        Staking(stakingAddress).confirmServiceStaking();
+         */
+    }
+
+    /**
+     * @notice Unstakes a specified amount of staking tokens for the coffee shop service
+     * @dev Only callable by the coffee shop owner
+     * @param amountToUnstake Number of staking tokens to unstake
+     */
+    function unstake(uint256 amountToUnstake) external onlyOwner {
+        // this is using the inherited function to make a service unstake
+        _makeUnstakeService(amountToUnstake);
+        /*
+        but if you don't want to use the inherited function, you can use the following code:
+        
+        Staking(stakingAddress).serviceUnstaking(amountToUnstake);
+        
+         */
+    }
+
+    /**
      * @notice Withdraws accumulated virtual blockchain reward tokens from the contract
      * @dev Only callable by the coffee shop owner
      *
      * @param to Address where the withdrawn reward tokens will be sent
-     *
-     * @dev Reverts with InvalidSignature() if caller is not the shop owner
      */
-    function withdrawRewards(address to) external {
-        // Ensure only the shop owner can withdraw accumulated rewards
-        if (msg.sender != ownerOfShop) revert InvalidSignature();
-
+    function withdrawRewards(address to) external onlyOwner {
         // Get the current balance of principal tokens (EVVM virtual blockchain rewards)
         uint256 balance = IEvvm(evvmAddress).getBalance(
             address(this),
@@ -221,13 +273,8 @@ contract EVVMCafe {
      * @dev Only callable by the coffee shop owner
      *
      * @param to Address where the withdrawn ETH will be sent
-     *
-     * @dev Reverts with InvalidSignature() if caller is not the shop owner
      */
-    function withdrawFunds(address to) external {
-        // Ensure only the shop owner can withdraw accumulated funds
-        if (msg.sender != ownerOfShop) revert InvalidSignature();
-
+    function withdrawFunds(address to) external onlyOwner {
         // Get the current ETH balance held by the contract
         uint256 balance = IEvvm(evvmAddress).getBalance(
             address(this),
