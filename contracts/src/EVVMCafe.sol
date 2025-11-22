@@ -226,7 +226,7 @@ contract EVVMCafe is StakingServiceHooks {
         _makeStakeService(amountToStake);
         /*
         but if you want to do it step by step, you can use the following code:
-        Staking(stakingAddress).prepareServiceStaking(amountToStake);
+        Staking(stakingAddress).2prepareServiceStaking(amountToStake);
         Evvm(evvmAddress).caPay(
             address(stakingAddress),
             0x0000000000000000000000000000000000000001,

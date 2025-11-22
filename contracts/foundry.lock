@@ -1,10 +1,4 @@
 {
-  "lib/Testnet-Contracts": {
-    "tag": {
-      "name": "v1.0.7",
-      "rev": "e346958fb043b66119d078582cdee12e3068d6ed"
-    }
-  },
   "lib/forge-std": {
     "tag": {
       "name": "v1.11.0",
@@ -15,6 +9,12 @@
     "tag": {
       "name": "v5.4.0",
       "rev": "c64a1edb67b6e3f4a15cca8909c9482ad33a02b0"
+    }
+  },
+  "lib/Testnet-Contracts": {
+    "tag": {
+      "name": "v1.0.7",
+      "rev": "e346958fb043b66119d078582cdee12e3068d6ed"
     }
   }
 }

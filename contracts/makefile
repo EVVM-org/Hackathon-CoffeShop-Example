@@ -14,4 +14,4 @@ ETH_SEPOLIA_TESTNET_ARGS := --rpc-url $(RPC_URL_ETH_SEPOLIA) \
 deployContract: 
 	@echo "Deploying testnet on Sepolia..."
 	@forge clean
-	@forge script script/EVVMCafe.s.sol:EVVMCafeScript $(ETH_SEPOLIA_TESTNET_ARGS) -vvvvvv
+	@forge script script/EVVMCafe.s.sol:EVVMCafeScript $(ETH_SEPOLIA_TESTNET_ARGS) --via-ir -vvvvvv
