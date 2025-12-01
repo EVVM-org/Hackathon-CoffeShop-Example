@@ -1,21 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {IEvvm} from "@evvm/testnet-contracts/interfaces/IEvvm.sol";
-import {SignatureRecover} from "@evvm/testnet-contracts/library/SignatureRecover.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {StakingServiceHooks} from "@evvm/testnet-contracts/library/StakingServiceHooks.sol";
+import {AdvancedStrings} from "@evvm/testnet-contracts/library/utils/AdvancedStrings.sol";
+import {EvvmService} from "@evvm/testnet-contracts/library/EvvmService.sol";
 
-contract EVVMCafe is StakingServiceHooks {
+contract EVVMCafe is EvvmService {
     // ============================================================================
     // ERRORS
     // ============================================================================
-
-    /// @notice Thrown when a provided signature is invalid or verification fails
-    error InvalidSignature();
-
-    /// @notice Thrown when attempting to reuse a nonce that has already been consumed
-    error NonceAlreadyUsed();
 
     /// @notice Thrown when an unauthorized action is attempted
     error Unauthorized();
@@ -24,24 +16,8 @@ contract EVVMCafe is StakingServiceHooks {
     // STATE VARIABLES
     // ============================================================================
 
-    /// @notice Address of the EVVM virtual blockchain contract for payment processing
-    address evvmAddress;
-
-    /// @notice Staking service contract address
-    address stakingAddress;
-
-    /// @notice Constant representing ETH in the EVVM virtual blockchain (address(0))
-    address constant ETHER_ADDRESS = address(0);
-
-    /// @notice Constant representing the principal token in EVVM virtual blockchain (address(1))
-    address constant PRINCIPAL_TOKEN_ADDRESS = address(1);
-
     /// @notice Address of the coffee shop owner who can withdraw funds and rewards
     address ownerOfShop;
-
-    /// @notice Mapping to track used nonces per client address to prevent replay attacks
-    /// @dev First key: client address, Second key: nonce, Value: whether nonce is used
-    mapping(address => mapping(uint256 => bool)) checkAsyncNonce;
 
     // ============================================================================
     // MODIFIERS
@@ -66,10 +42,8 @@ contract EVVMCafe is StakingServiceHooks {
         address _evvmAddress,
         address _stakingAddress,
         address _ownerOfShop
-    ) StakingServiceHooks(_stakingAddress) {
-        evvmAddress = _evvmAddress;
+    ) EvvmService(_evvmAddress, _stakingAddress) {
         ownerOfShop = _ownerOfShop;
-        stakingAddress = _stakingAddress;
     }
 
     // ============================================================================
@@ -125,26 +99,23 @@ contract EVVMCafe is StakingServiceHooks {
          * 2) It was not signed by the clientAddress
          * 3) some input data was tampered by the fisher or during transmission
          */
-        if (
-            !SignatureRecover.signatureVerification(
-                Strings.toString(IEvvm(evvmAddress).getEvvmID()),
-                "orderCoffee",
-                string.concat(
-                    coffeeType,
-                    ",",
-                    Strings.toString(quantity),
-                    ",",
-                    Strings.toString(totalPrice),
-                    ",",
-                    Strings.toString(nonce)
-                ),
-                signature,
-                clientAddress
-            )
-        ) revert InvalidSignature();
+        validateServiceSignature(
+            "orderCoffee",
+            string.concat(
+                coffeeType,
+                ",",
+                AdvancedStrings.uintToString(quantity),
+                ",",
+                AdvancedStrings.uintToString(totalPrice),
+                ",",
+                AdvancedStrings.uintToString(nonce)
+            ),
+            signature,
+            clientAddress
+        );
 
         // Prevent replay attacks by checking if nonce has been used before
-        if (checkAsyncNonce[clientAddress][nonce]) revert NonceAlreadyUsed();
+        verifyAsyncServiceNonce(clientAddress, nonce);
 
         /**
          * Pay for the coffee using EVVM virtual blockchain's pay function
@@ -171,16 +142,13 @@ contract EVVMCafe is StakingServiceHooks {
          * · All the priority fees paid by the client for this transaction
          * · 1 reward according to the EVVM's reward mechanism
          */
-        IEvvm(evvmAddress).pay(
+        requestPay(
             clientAddress,
-            address(this),
-            "",
-            ETHER_ADDRESS,
+            getEtherAddress(),
             totalPrice,
             priorityFee_EVVM,
             nonce_EVVM,
             priorityFlag_EVVM,
-            address(this),
             signature_EVVM
         );
 
@@ -196,24 +164,20 @@ contract EVVMCafe is StakingServiceHooks {
          * Note: You could optionally restrict this to only staker fishers by adding:
          * IEvvm(evvmAddress).isAddressStaker(msg.sender) to the condition
          */
-        if (IEvvm(evvmAddress).isAddressStaker(address(this))) {
+        if (evvm.isAddressStaker(address(this))) {
             // Transfer the priority fee to the fisher as immediate incentive
-            IEvvm(evvmAddress).caPay(
-                msg.sender,
-                ETHER_ADDRESS,
-                priorityFee_EVVM
-            );
+            makeCaPay(msg.sender, getEtherAddress(), priorityFee_EVVM);
 
             // Transfer half of the reward (on principal tokens) to the fisher
-            IEvvm(evvmAddress).caPay(
+            makeCaPay(
                 msg.sender,
-                PRINCIPAL_TOKEN_ADDRESS,
-                IEvvm(evvmAddress).getRewardAmount() / 2
+                getPrincipalTokenAddress(),
+                evvm.getRewardAmount() / 2
             );
         }
 
         // Mark nonce as used to prevent future reuse
-        checkAsyncNonce[clientAddress][nonce] = true;
+        markAsyncServiceNonceAsUsed(clientAddress, nonce);
     }
 
     /**
@@ -260,13 +224,13 @@ contract EVVMCafe is StakingServiceHooks {
      */
     function withdrawRewards(address to) external onlyOwner {
         // Get the current balance of principal tokens (EVVM virtual blockchain rewards)
-        uint256 balance = IEvvm(evvmAddress).getBalance(
+        uint256 balance = evvm.getBalance(
             address(this),
-            PRINCIPAL_TOKEN_ADDRESS
+            getPrincipalTokenAddress()
         );
 
         // Transfer all accumulated reward tokens to the specified address
-        IEvvm(evvmAddress).caPay(to, PRINCIPAL_TOKEN_ADDRESS, balance);
+        makeCaPay(to, getPrincipalTokenAddress(), balance);
     }
 
     /**
@@ -277,47 +241,21 @@ contract EVVMCafe is StakingServiceHooks {
      */
     function withdrawFunds(address to) external onlyOwner {
         // Get the current ETH balance held by the contract
-        uint256 balance = IEvvm(evvmAddress).getBalance(
-            address(this),
-            ETHER_ADDRESS
-        );
+        uint256 balance = evvm.getBalance(address(this), getEtherAddress());
 
         // Transfer all accumulated ETH to the specified address
-        IEvvm(evvmAddress).caPay(to, ETHER_ADDRESS, balance);
-    }
-
-    function isThisNonceUsed(
-        address clientAddress,
-        uint256 nonce
-    ) external view returns (bool) {
-        return checkAsyncNonce[clientAddress][nonce];
+        makeCaPay(to, getEtherAddress(), balance);
     }
 
     function getOwnerOfShop() external view returns (address) {
         return ownerOfShop;
     }
 
-    function getPrincipalTokenAddress() external pure returns (address) {
-        return PRINCIPAL_TOKEN_ADDRESS;
-    }
-
-    function getEtherAddress() external pure returns (address) {
-        return ETHER_ADDRESS;
-    }
-
     function getAmountOfPrincipalTokenInShop() external view returns (uint256) {
-        return
-            IEvvm(evvmAddress).getBalance(
-                address(this),
-                PRINCIPAL_TOKEN_ADDRESS
-            );
-    }
-
-    function getEvvmAddress() external view returns (address) {
-        return evvmAddress;
+        return evvm.getBalance(address(this), getPrincipalTokenAddress());
     }
 
     function getAmountOfEtherInShop() external view returns (uint256) {
-        return IEvvm(evvmAddress).getBalance(address(this), ETHER_ADDRESS);
+        return evvm.getBalance(address(this), getEtherAddress());
     }
 }
