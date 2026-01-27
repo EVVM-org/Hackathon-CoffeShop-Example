@@ -1,61 +1,40 @@
 import React from "react";
-import EVVMCafe from "@/constant/EVVMCafe.json";
-import address from "@/constant/address.json";
 import styles from "./VisualExecution.module.css";
-import { writeContract } from "viem/actions";
-import { config } from "@/config/index";
-import { executeTransactionData } from "@/utils/executeTransactionData";
+import { CafeData } from "@/types/cafedata.type";
+import { SignedAction, execute } from "@evvm/evvm-js";
+import { useEvvm } from "@/hooks/useEvvm";
 
-type OrderCoffeeInputData = {
-  clientAddress: `0x${string}`;
-  coffeeType: string;
-  quantity: bigint;
-  totalPrice: bigint;
-  nonce: bigint;
-  signature: string;
-  priorityFee_EVVM: bigint;
-  nonce_EVVM: bigint;
-  priorityFlag_EVVM: boolean;
-  signature_EVVM: string;
-};
-
-interface TicketProps {
-  orderCoffeeInputData: OrderCoffeeInputData;
+interface VisualExecutionProps {
+  orderCoffeeSignedAction: SignedAction<CafeData>;
 }
 
-export const VisualExecution: React.FC<TicketProps> = ({
-  orderCoffeeInputData,
+export const VisualExecution: React.FC<VisualExecutionProps> = ({
+  orderCoffeeSignedAction,
 }) => {
-  const jsonData = {
-    transactionType: "orderCoffee",
-    clientAddress: orderCoffeeInputData.clientAddress,
-    coffeeType: orderCoffeeInputData.coffeeType,
-    quantity: orderCoffeeInputData.quantity.toString(),
-    totalPrice: orderCoffeeInputData.totalPrice.toString(),
-    nonce: orderCoffeeInputData.nonce.toString(),
-    signature: orderCoffeeInputData.signature,
-    priorityFee_EVVM: orderCoffeeInputData.priorityFee_EVVM.toString(),
-    nonce_EVVM: orderCoffeeInputData.nonce_EVVM.toString(),
-    priorityFlag_EVVM: orderCoffeeInputData.priorityFlag_EVVM,
-    signature_EVVM: orderCoffeeInputData.signature_EVVM,
-  };
+  const { signer } = useEvvm();
+  const jsonData = JSON.stringify(orderCoffeeSignedAction, null, 2);
 
+  const executeTx = async () => {
+    try {
+      console.log("Executing...");
+      const txHash = await execute(signer, orderCoffeeSignedAction);
+      console.log("Success!");
+      console.log({ txHash });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <>
-    <div className={styles.terminalContainer}>
-      <div className={styles.terminalHeader}>
-        <span className={styles.terminalTitle}>Order Data</span>
+      <div className={styles.terminalContainer}>
+        <div className={styles.terminalHeader}>
+          <span className={styles.terminalTitle}>Order Data</span>
+        </div>
+
+        <pre className={styles.jsonContainer}>{jsonData}</pre>
       </div>
-
-      <pre className={styles.jsonContainer}>
-        {JSON.stringify(jsonData, null, 2)}
-      </pre>
-
-      
-    </div>
-    <button onClick={() => executeTransactionData(orderCoffeeInputData)}>Execute Transaction</button>
+      <button onClick={executeTx}>Execute Transaction</button>
     </>
-    
   );
 };
