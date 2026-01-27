@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@evvm/viem-signature-library": "^2.0.0",
+    "@evvm/evvm-js": "^0.1.7",
     "@reown/appkit": "1.8.17",
     "@reown/appkit-adapter-wagmi": "1.8.17",
     "@tanstack/react-query": "^5.59.20",

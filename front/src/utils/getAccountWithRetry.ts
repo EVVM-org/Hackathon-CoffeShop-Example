@@ -8,14 +8,18 @@ import { getAccount } from "@wagmi/core";
  * @param intervalMs intervalo entre intentos en ms (default: 200)
  * @returns Promise con el objeto de cuenta o null si falla
  */
-export async function getAccountWithRetry(config: unknown, maxAttempts = 10, intervalMs = 200): Promise<ReturnType<typeof getAccount> | null> {
+export async function getAccountWithRetry(
+  config: unknown,
+  maxAttempts = 10,
+  intervalMs = 200,
+): Promise<ReturnType<typeof getAccount> | null> {
   let attempts = 0;
   let walletData = getAccount(config as Parameters<typeof getAccount>[0]);
 
   while (!walletData.address && attempts < maxAttempts) {
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
     attempts++;
-  walletData = getAccount(config as Parameters<typeof getAccount>[0]);
+    walletData = getAccount(config as Parameters<typeof getAccount>[0]);
   }
 
   if (!walletData.address) {
