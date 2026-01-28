@@ -11,9 +11,11 @@ import { useEffect, useState } from "react";
 import { CoffeeService } from "@/lib/services/coffee-service.evvm";
 import { useEvvm } from "@/hooks/useEvvm";
 import { IPayData, SignedAction } from "@evvm/evvm-js";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 export const CafeComponent = () => {
   const { evvmService, signer } = useEvvm();
+  const { isConnected } = useAppKitAccount();
   const [progressHistory, setProgressHistory] = useState<string>("begin");
   const [coffeeType, setCoffeeType] = useState<string>("Fisher Espresso");
   const [quantityCoffee, setQuantityCoffee] = useState<number>(1);
@@ -77,6 +79,8 @@ export const CafeComponent = () => {
     setOrderCoffeeSignedAction(orderCoffeeSignedAction);
     setProgressHistory("signed");
   };
+
+  if (!isConnected) return null;
 
   return (
     <div>
