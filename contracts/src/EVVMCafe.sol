@@ -20,6 +20,17 @@ contract EVVMCafe is EvvmService {
     address ownerOfShop;
 
     // ============================================================================
+    // EVENTS
+    // ============================================================================
+
+    /// @notice Emitted when a coffee order is successfully placed
+    event CoffeeOrdered(
+        address indexed client,
+        string indexed coffeeType,
+        uint256 indexed quantity
+    );
+
+    // ============================================================================
     // MODIFIERS
     // ============================================================================
 
@@ -178,6 +189,8 @@ contract EVVMCafe is EvvmService {
 
         // Mark nonce as used to prevent future reuse
         markAsyncServiceNonceAsUsed(clientAddress, nonce);
+
+        emit CoffeeOrdered(clientAddress, coffeeType, quantity);
     }
 
     /**
