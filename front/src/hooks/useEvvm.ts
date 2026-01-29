@@ -11,7 +11,6 @@ export const useEvvm = () => {
   const { isConnected } = useAppKitAccount();
   const [signer, setSigner] = useState<ISigner | null>(null);
   const [evvmService, setEvvmService] = useState<EVVM | null>(null);
-  const [ready, setReady] = useState<boolean>(false);
 
   useEffect(() => {
     setupSigner();
@@ -33,13 +32,10 @@ export const useEvvm = () => {
 
     const _evvmService = new EVVM(signer, Addresses.EVVMAddress);
     setEvvmService(_evvmService);
-
-    setReady(true);
   };
 
   return {
     signer,
     evvmService,
-    ready,
   };
 };
