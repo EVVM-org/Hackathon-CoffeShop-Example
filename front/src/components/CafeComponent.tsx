@@ -1,6 +1,6 @@
 "use client";
-import Addresses from "@/constant/address.json";
 import styles from "./CafeComponent.module.css";
+import Addresses from "@/constant/address.json";
 import { formatEther } from "viem/utils";
 import { generateRandomNumber } from "@/utils/mersenneTwister";
 import { Ticket } from "./Ticket";
@@ -52,7 +52,7 @@ export const CafeComponent = () => {
       throw new Error("No evvmSyncNonce when makeSig() called");
 
     // instantiate custom coffee service
-    const coffeeService = new CoffeeService(signer, Addresses.CafeAddress);
+    const coffeeService = new CoffeeService(signer);
 
     const nonce =
       priorityFlagOnEvvm === "false" ? evvmSyncNonce : evvmAsyncNonce;
@@ -209,7 +209,9 @@ export const CafeComponent = () => {
 
       {orderCoffeeSignedAction && progressHistory === "fishing" && (
         <div>
-          <VisualExecution orderCoffeeSignedAction={orderCoffeeSignedAction} />
+          <VisualExecution
+            orderCoffeeSignedAction={orderCoffeeSignedAction.toJSON()}
+          />
         </div>
       )}
     </div>

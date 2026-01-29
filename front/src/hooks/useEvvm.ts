@@ -30,7 +30,11 @@ export const useEvvm = () => {
   const setupEvvmService = async () => {
     if (!signer) return;
 
-    const _evvmService = new EVVM(signer, Addresses.EVVMAddress);
+    const _evvmService = new EVVM({
+      signer,
+      address: Addresses.EVVMAddress,
+      chainId: 11155111, // testnet
+    });
     setEvvmService(_evvmService);
   };
 

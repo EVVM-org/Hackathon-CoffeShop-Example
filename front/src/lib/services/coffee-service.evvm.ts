@@ -1,15 +1,28 @@
-import { BaseService, IPayData, ISigner, SignedAction } from "@evvm/evvm-js";
+import {
+  BaseService,
+  IPayData,
+  ISigner,
+  SignedAction,
+  SignMethod,
+} from "@evvm/evvm-js";
 import EvvmCafeABI from "@/constant/EVVMCafe.json";
 import { OrderCoffeeInputData } from "@/types/cafedata.type";
+import Addresses from "@/constant/address.json";
 
 /**
  * Custom service for Coffee Shop use case
  */
 export class CoffeeService extends BaseService {
-  constructor(signer: ISigner, address: string) {
-    super(signer, address, EvvmCafeABI.abi);
+  constructor(signer: ISigner) {
+    super({
+      signer,
+      address: Addresses.CafeAddress,
+      abi: EvvmCafeABI.abi,
+      chainId: 11155111,
+    });
   }
 
+  @SignMethod
   async orderCoffee({
     coffeeType,
     quantity,
