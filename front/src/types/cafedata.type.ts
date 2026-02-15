@@ -13,8 +13,8 @@ export type OrderCoffeeInputData = {
   totalPrice: bigint;
   nonce: bigint;
   signature: string;
-  priorityFee_EVVM?: bigint;
-  nonce_EVVM: bigint;
-  priorityFlag_EVVM: boolean;
-  signature_EVVM: string;
+  priorityFeePay?: bigint;
+  noncePay: bigint;
+  isAsyncExecPay: boolean;
+  signaturePay: string;
 };

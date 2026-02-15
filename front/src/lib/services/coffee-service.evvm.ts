@@ -37,13 +37,13 @@ export class CoffeeService extends BaseService {
     evvmSignedAction: SignedAction<IPayData>;
   }): Promise<SignedAction<OrderCoffeeInputData>> {
     // const evvmId = await this.getEvvmID();
-    const evvmId = evvmSignedAction.evvmId;
+    const evvmId = await this.getEvvmID();
     const functionName = "orderCoffee";
 
     const inputs = `${coffeeType},${quantity.toString()},${totalPrice.toString()},${nonce.toString()}`;
     const message = `${evvmId},${functionName},${inputs}`;
 
-    const signature = await this.signERC191Message(message);
+    const signature = await this.signer.signMessage(message);
 
     return new SignedAction(this, evvmId, functionName, {
       clientAddress: this.signer.address,
@@ -52,10 +52,10 @@ export class CoffeeService extends BaseService {
       totalPrice,
       nonce,
       signature,
-      priorityFee_EVVM: evvmSignedAction.data.priorityFee,
-      nonce_EVVM: evvmSignedAction.data.nonce,
-      priorityFlag_EVVM: evvmSignedAction.data.priorityFlag,
-      signature_EVVM: evvmSignedAction.data.signature,
+      priorityFeePay: evvmSignedAction.data.priorityFee,
+      noncePay: evvmSignedAction.data.nonce,
+      isAsyncExecPay: evvmSignedAction.data.isAsyncExec,
+      signaturePay: evvmSignedAction.data.signature,
     });
   }
 }

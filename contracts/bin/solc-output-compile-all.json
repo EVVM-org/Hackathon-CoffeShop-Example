@@ -1674,22 +1674,22 @@
                             },
                             {
                                 "internalType": "uint256",
-                                "name": "priorityFee_EVVM",
+                                "name": "priorityFeePay",
                                 "type": "uint256"
                             },
                             {
                                 "internalType": "uint256",
-                                "name": "nonce_EVVM",
+                                "name": "noncePay",
                                 "type": "uint256"
                             },
                             {
                                 "internalType": "bool",
-                                "name": "priorityFlag_EVVM",
+                                "name": "isAsyncExecPay",
                                 "type": "bool"
                             },
                             {
                                 "internalType": "bytes",
-                                "name": "signature_EVVM",
+                                "name": "signaturePay",
                                 "type": "bytes"
                             }
                         ],
@@ -1955,7 +1955,7 @@
                         "orderCoffee(address,string,uint256,uint256,uint256,bytes,uint256,uint256,bool,bytes)": "95e7ee96"
                     }
                 },
-                "metadata": "{\"compiler\":{\"version\":\"0.8.30+commit.73712a01\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_evvmAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"InvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"checkAsyncNonce\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"coffeeType\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalPrice\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"priorityFee_EVVM\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nonce_EVVM\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"priorityFlag_EVVM\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"signature_EVVM\",\"type\":\"bytes\"}],\"name\":\"orderCoffee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/src/CoffeShop.sol\":\"CoffeShop\"},\"evmVersion\":\"prague\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/Testnet-Contracts/src/interfaces/IEvvm.sol\":{\"keccak256\":\"0x8f88508b9a19e990cef8da6497dbaa56ca21224985c7227a980e71bba84c54cf\",\"license\":\"EVVM-NONCOMMERCIAL-1.0\",\"urls\":[\"bzz-raw://ad694a867329c402aa01f606674ca81ee4bcfd7f360daf737b3f51248816fcd8\",\"dweb:/ipfs/QmUr8pjdwUQ1L6kXvsYdY5LxjmVVbhW5xaUZ2i3US2t29k\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/Testnet-Contracts/src/library/SignatureRecover.sol\":{\"keccak256\":\"0xb35febcb088901a6639a1249697890989b60900456b431e5f9e14c51b91cb8e9\",\"license\":\"EVVM-NONCOMMERCIAL-1.0\",\"urls\":[\"bzz-raw://d295a26b043400b0ddc56cad1a495bac97acb7fd587e9409779fb9dfe224f20a\",\"dweb:/ipfs/QmVr8cpEyKsWVxb6sso3QFi1f6wv83uCFa3Yh5rZPWWmGL\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/Panic.sol\":{\"keccak256\":\"0xf7fe324703a64fc51702311dc51562d5cb1497734f074e4f483bfb6717572d7a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c6a5ff4f9fd8649b7ee20800b7fa387d3465bd77cf20c2d1068cd5c98e1ed57a\",\"dweb:/ipfs/QmVSaVJf9FXFhdYEYeCEfjMVHrxDh5qL4CGkxdMWpQCrqG\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/Strings.sol\":{\"keccak256\":\"0xad148d59f05165f9217d0a9e1ac8f772abb02ea6aaad8a756315c532bf79f9f4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://15e3599867c2182f5831e9268b274b2ef2047825837df6b4d81c9e89254b093e\",\"dweb:/ipfs/QmZbL7XAYr5RmaNaooPgZRmcDXaudfsYQfYD9y5iAECvpS\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/math/Math.sol\":{\"keccak256\":\"0x1225214420c83ebcca88f2ae2b50f053aaa7df7bd684c3e878d334627f2edfc6\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6c5fab4970634f9ab9a620983dc1c8a30153981a0b1a521666e269d0a11399d3\",\"dweb:/ipfs/QmVRnBC575MESGkEHndjujtR7qub2FzU9RWy9eKLp4hPZB\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol\":{\"keccak256\":\"0x195533c86d0ef72bcc06456a4f66a9b941f38eb403739b00f21fd7c1abd1ae54\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b1d578337048cad08c1c03041cca5978eff5428aa130c781b271ad9e5566e1f8\",\"dweb:/ipfs/QmPFKL2r9CBsMwmUqqdcFPfHZB2qcs9g1HDrPxzWSxomvy\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol\":{\"keccak256\":\"0xb1970fac7b64e6c09611e6691791e848d5e3fe410fa5899e7df2e0afd77a99e3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://db5fbb3dddd8b7047465b62575d96231ba8a2774d37fb4737fbf23340fabbb03\",\"dweb:/ipfs/QmVUSvooZKEdEdap619tcJjTLcAuH6QBdZqAzWwnAXZAWJ\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/src/CoffeShop.sol\":{\"keccak256\":\"0xf7923cceffe65c5690de55131f2fba3a946e8e5721cfb20188d41a0aed6fd235\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://e822ae244cf74453e67d6b5910c5259e0841be00787d0a84d0043bc34386e51e\",\"dweb:/ipfs/QmcStRvz372vAD4rvyXQdhrgiz43YJQVFH2t8rfu2dfzLz\"]}},\"version\":1}",
+                "metadata": "{\"compiler\":{\"version\":\"0.8.30+commit.73712a01\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_evvmAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"InvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"checkAsyncNonce\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"coffeeType\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalPrice\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"priorityFeePay\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"noncePay\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"isAsyncExecPay\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"signaturePay\",\"type\":\"bytes\"}],\"name\":\"orderCoffee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/src/CoffeShop.sol\":\"CoffeShop\"},\"evmVersion\":\"prague\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/Testnet-Contracts/src/interfaces/IEvvm.sol\":{\"keccak256\":\"0x8f88508b9a19e990cef8da6497dbaa56ca21224985c7227a980e71bba84c54cf\",\"license\":\"EVVM-NONCOMMERCIAL-1.0\",\"urls\":[\"bzz-raw://ad694a867329c402aa01f606674ca81ee4bcfd7f360daf737b3f51248816fcd8\",\"dweb:/ipfs/QmUr8pjdwUQ1L6kXvsYdY5LxjmVVbhW5xaUZ2i3US2t29k\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/Testnet-Contracts/src/library/SignatureRecover.sol\":{\"keccak256\":\"0xb35febcb088901a6639a1249697890989b60900456b431e5f9e14c51b91cb8e9\",\"license\":\"EVVM-NONCOMMERCIAL-1.0\",\"urls\":[\"bzz-raw://d295a26b043400b0ddc56cad1a495bac97acb7fd587e9409779fb9dfe224f20a\",\"dweb:/ipfs/QmVr8cpEyKsWVxb6sso3QFi1f6wv83uCFa3Yh5rZPWWmGL\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/Panic.sol\":{\"keccak256\":\"0xf7fe324703a64fc51702311dc51562d5cb1497734f074e4f483bfb6717572d7a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c6a5ff4f9fd8649b7ee20800b7fa387d3465bd77cf20c2d1068cd5c98e1ed57a\",\"dweb:/ipfs/QmVSaVJf9FXFhdYEYeCEfjMVHrxDh5qL4CGkxdMWpQCrqG\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/Strings.sol\":{\"keccak256\":\"0xad148d59f05165f9217d0a9e1ac8f772abb02ea6aaad8a756315c532bf79f9f4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://15e3599867c2182f5831e9268b274b2ef2047825837df6b4d81c9e89254b093e\",\"dweb:/ipfs/QmZbL7XAYr5RmaNaooPgZRmcDXaudfsYQfYD9y5iAECvpS\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/math/Math.sol\":{\"keccak256\":\"0x1225214420c83ebcca88f2ae2b50f053aaa7df7bd684c3e878d334627f2edfc6\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6c5fab4970634f9ab9a620983dc1c8a30153981a0b1a521666e269d0a11399d3\",\"dweb:/ipfs/QmVRnBC575MESGkEHndjujtR7qub2FzU9RWy9eKLp4hPZB\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol\":{\"keccak256\":\"0x195533c86d0ef72bcc06456a4f66a9b941f38eb403739b00f21fd7c1abd1ae54\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b1d578337048cad08c1c03041cca5978eff5428aa130c781b271ad9e5566e1f8\",\"dweb:/ipfs/QmPFKL2r9CBsMwmUqqdcFPfHZB2qcs9g1HDrPxzWSxomvy\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol\":{\"keccak256\":\"0xb1970fac7b64e6c09611e6691791e848d5e3fe410fa5899e7df2e0afd77a99e3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://db5fbb3dddd8b7047465b62575d96231ba8a2774d37fb4737fbf23340fabbb03\",\"dweb:/ipfs/QmVUSvooZKEdEdap619tcJjTLcAuH6QBdZqAzWwnAXZAWJ\"]},\"/home/jistro/work/EVVM/Hackathon-CoffeShop-Example/contracts/src/CoffeShop.sol\":{\"keccak256\":\"0xf7923cceffe65c5690de55131f2fba3a946e8e5721cfb20188d41a0aed6fd235\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://e822ae244cf74453e67d6b5910c5259e0841be00787d0a84d0043bc34386e51e\",\"dweb:/ipfs/QmcStRvz372vAD4rvyXQdhrgiz43YJQVFH2t8rfu2dfzLz\"]}},\"version\":1}",
                 "storageLayout": {
                     "storage": [
                         {
@@ -75512,7 +75512,7 @@
                                                     },
                                                     {
                                                         "id": 5570,
-                                                        "name": "priorityFee_EVVM",
+                                                        "name": "priorityFeePay",
                                                         "nodeType": "Identifier",
                                                         "overloadedDeclarations": [],
                                                         "referencedDeclaration": 5510,
@@ -75524,7 +75524,7 @@
                                                     },
                                                     {
                                                         "id": 5571,
-                                                        "name": "nonce_EVVM",
+                                                        "name": "noncePay",
                                                         "nodeType": "Identifier",
                                                         "overloadedDeclarations": [],
                                                         "referencedDeclaration": 5512,
@@ -75536,7 +75536,7 @@
                                                     },
                                                     {
                                                         "id": 5572,
-                                                        "name": "priorityFlag_EVVM",
+                                                        "name": "isAsyncExecPay",
                                                         "nodeType": "Identifier",
                                                         "overloadedDeclarations": [],
                                                         "referencedDeclaration": 5514,
@@ -75605,7 +75605,7 @@
                                                     },
                                                     {
                                                         "id": 5577,
-                                                        "name": "signature_EVVM",
+                                                        "name": "signaturePay",
                                                         "nodeType": "Identifier",
                                                         "overloadedDeclarations": [],
                                                         "referencedDeclaration": 5516,
@@ -75924,7 +75924,7 @@
                                             "constant": false,
                                             "id": 5510,
                                             "mutability": "mutable",
-                                            "name": "priorityFee_EVVM",
+                                            "name": "priorityFeePay",
                                             "nameLocation": "988:16:7",
                                             "nodeType": "VariableDeclaration",
                                             "scope": 5581,
@@ -75951,7 +75951,7 @@
                                             "constant": false,
                                             "id": 5512,
                                             "mutability": "mutable",
-                                            "name": "nonce_EVVM",
+                                            "name": "noncePay",
                                             "nameLocation": "1022:10:7",
                                             "nodeType": "VariableDeclaration",
                                             "scope": 5581,
@@ -75978,7 +75978,7 @@
                                             "constant": false,
                                             "id": 5514,
                                             "mutability": "mutable",
-                                            "name": "priorityFlag_EVVM",
+                                            "name": "isAsyncExecPay",
                                             "nameLocation": "1047:17:7",
                                             "nodeType": "VariableDeclaration",
                                             "scope": 5581,
@@ -76005,7 +76005,7 @@
                                             "constant": false,
                                             "id": 5516,
                                             "mutability": "mutable",
-                                            "name": "signature_EVVM",
+                                            "name": "signaturePay",
                                             "nameLocation": "1087:14:7",
                                             "nodeType": "VariableDeclaration",
                                             "scope": 5581,
