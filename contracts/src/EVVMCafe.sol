@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {AdvancedStrings} from "@evvm/testnet-contracts/library/utils/AdvancedStrings.sol";
+import {
+    AdvancedStrings
+} from "@evvm/testnet-contracts/library/utils/AdvancedStrings.sol";
+import {CoreStructs} from "@evvm/testnet-contracts/interfaces/ICore.sol";
 import {EvvmService} from "@evvm/testnet-contracts/library/EvvmService.sol";
 
 contract EVVMCafe is EvvmService {
@@ -46,14 +49,14 @@ contract EVVMCafe is EvvmService {
 
     /**
      * @notice Initializes the coffee shop contract with EVVM integration
-     * @param _evvmAddress Address of the EVVM virtual blockchain contract for payment processing
+     * @param _coreAddress Address of the EVVM virtual blockchain contract for payment processing
      * @param _ownerOfShop Address that will have administrative privileges over the shop
      */
     constructor(
-        address _evvmAddress,
+        address _coreAddress,
         address _stakingAddress,
         address _ownerOfShop
-    ) EvvmService(_evvmAddress, _stakingAddress) {
+    ) EvvmService(_coreAddress, _stakingAddress) {
         ownerOfShop = _ownerOfShop;
     }
 
@@ -70,11 +73,11 @@ contract EVVMCafe is EvvmService {
      * @param totalPrice Total price to be paid in ETH (in wei)
      * @param nonce Unique number to prevent replay attacks (must not be reused)
      * @param signature Client's signature authorizing the coffee order
-     * @param priorityFee_EVVM Fee paid for transaction priority in EVVM
-     * @param nonce_EVVM Unique nonce for the EVVM payment transaction
-     * @param priorityFlag_EVVM Boolean flag indicating the type of nonce we are using
+     * @param priorityFeeEvvm Fee paid for transaction priority in EVVM
+     * @param nonceEvvm Unique nonce for the EVVM payment transaction
+     * @param priorityFlagEvvm Boolean flag indicating the type of nonce we are using
      *                          (true for async nonce, false for sync nonce)
-     * @param signature_EVVM Signature authorizing the EVVM payment transaction
+     * @param signatureEvvm Signature authorizing the EVVM payment transaction
      *
      * @dev Signature format for client authorization:
      *      "<evvmID>,orderCoffee,<coffeeType>,<quantity>,<totalPrice>,<nonce>"
@@ -87,46 +90,51 @@ contract EVVMCafe is EvvmService {
         string memory coffeeType,
         uint256 quantity,
         uint256 totalPrice,
+        address originExecutor,
         uint256 nonce,
+        bool isAsyncExec,
         bytes memory signature,
-        uint256 priorityFee_EVVM,
-        uint256 nonce_EVVM,
-        bool priorityFlag_EVVM,
-        bytes memory signature_EVVM
+        uint256 priorityFeeEvvm,
+        uint256 nonceEvvm,
+        bool isAsyncExecEvvm,
+        bytes memory signatureEvvm
     ) external {
         /**
-         * Verify client's signature for ordering coffee
+         * Verify client's signature and evvm nonce for ordering coffee
          * The signed message format is:
-         * "<evvmID>,orderCoffee,<coffeeType>,<quantity>,<totalPrice>,<nonce>"
+         * "<evvmID>,<serviceAddress>,<hashPayload>,<originExecutor>,<nonce>,<isAsyncExec>"
          * Where:
          * · <evvmID> ------ is obtained from IEvvm(evvmAddress).getEvvmID()
-         * · "orderCoffee" - is the name of the function being called
-         * · <coffeeType> -- is the type of coffee ordered
-         * · <quantity> ---- is the number of coffees ordered
-         * · <totalPrice> -- is the total price to be paid in ETH
-         * · <nonce> ------- is a unique number to prevent replay attacks
+         * · <serviceAddress> - is address(this) (the CoffeeShop contract)
+         * · <hashPayload> --- is the keccak256 hash of the payload being signed
+         *                     The payload is the encoding of the function 
+         *                     name and parameters:
+         *                    "orderCoffee,<coffeeType>,<quantity>,<totalPrice>"
+         * · <originExecutor> -- is the address of the original executor 
+         *                       (the fisher who will execute this transaction)
+         * · <nonce> ---- is the number used to prevent replay attacks
+         * · <isAsyncExec> -- indicates if the type of nonce execution is 
+         *                     async (true) or sync (false)
          * If the signature is invalid because:
          * 1) It does not match the expected format
          * 2) It was not signed by the clientAddress
          * 3) some input data was tampered by the fisher or during transmission
          */
-        validateServiceSignature(
-            "orderCoffee",
-            string.concat(
+         core.validateAndConsumeNonce(
+            user,
+            keccak256(abi.encode(
+                "orderCoffee",
                 coffeeType,
-                ",",
-                AdvancedStrings.uintToString(quantity),
-                ",",
-                AdvancedStrings.uintToString(totalPrice),
-                ",",
-                AdvancedStrings.uintToString(nonce)
-            ),
-            signature,
-            clientAddress
+                quantity,
+                totalPrice
+            )),
+            originExecutor,
+            nonce,
+            isAsyncExec,
+            signature
         );
 
         // Prevent replay attacks by checking if nonce has been used before
-        verifyAsyncServiceNonce(clientAddress, nonce);
 
         /**
          * Pay for the coffee using EVVM virtual blockchain's pay function
@@ -136,11 +144,11 @@ contract EVVMCafe is EvvmService {
          * · to_identity ---- "" (not used in this case)
          * · token ---------- ETHER_ADDRESS (indicating payment in ETH)
          * · amount --------- totalPrice (the total price of the coffee)
-         * · priorityFee ---- priorityFee_EVVM (fee for prioritizing the transaction)
-         * · nonce ---------- nonce_EVVM (unique number for this payment)
-         * · priorityFlag --- priorityFlag_EVVM (indicates if the payment is prioritized)
-         * · executor ------- address(this) (the CoffeShop contract will execute the payment)
-         * · signature ------ signature_EVVM (signature authorizing the payment)
+         * · priorityFee ---- priorityFeeEvvm (fee for prioritizing the transaction)
+         * · senderExecutor ------- address(this) (the CoffeShop contract will execute the payment)
+         * · nonce ---------- nonceEvvm (unique number for this payment)
+         * · isAsyncExec --- isAsyncExecEvvm (indicates if the payment is prioritized)
+         * · signature ------ signatureEvvm (signature authorizing the payment)
          *
          * If the payment fails due to
          * 1) Insufficient balance
@@ -157,10 +165,10 @@ contract EVVMCafe is EvvmService {
             clientAddress,
             getEtherAddress(),
             totalPrice,
-            priorityFee_EVVM,
-            nonce_EVVM,
-            priorityFlag_EVVM,
-            signature_EVVM
+            priorityFeeEvvm,
+            nonceEvvm,
+            isAsyncExecEvvm,
+            signatureEvvm
         );
 
         /**
@@ -169,21 +177,21 @@ contract EVVMCafe is EvvmService {
          * This creates an economic incentive for fishers to process transactions.
          *
          * Rewards distributed:
-         * 1. All priority fees paid by the client (priorityFee_EVVM)
+         * 1. All priority fees paid by the client (priorityFeeEvvm)
          * 2. Half of the reward earned from this transaction
          *
          * Note: You could optionally restrict this to only staker fishers by adding:
          * IEvvm(evvmAddress).isAddressStaker(msg.sender) to the condition
          */
-        if (evvm.isAddressStaker(address(this))) {
+        if (core.isAddressStaker(address(this))) {
             // Transfer the priority fee to the fisher as immediate incentive
-            makeCaPay(msg.sender, getEtherAddress(), priorityFee_EVVM);
+            makeCaPay(msg.sender, getEtherAddress(), priorityFeeEvvm);
 
             // Transfer half of the reward (on principal tokens) to the fisher
             makeCaPay(
                 msg.sender,
                 getPrincipalTokenAddress(),
-                evvm.getRewardAmount() / 2
+                core.getRewardAmount() / 2
             );
         }
 
@@ -191,6 +199,7 @@ contract EVVMCafe is EvvmService {
         markAsyncServiceNonceAsUsed(clientAddress, nonce);
 
         emit CoffeeOrdered(clientAddress, coffeeType, quantity);
+
     }
 
     /**
@@ -237,7 +246,7 @@ contract EVVMCafe is EvvmService {
      */
     function withdrawRewards(address to) external onlyOwner {
         // Get the current balance of principal tokens (EVVM virtual blockchain rewards)
-        uint256 balance = evvm.getBalance(
+        uint256 balance = core.getBalance(
             address(this),
             getPrincipalTokenAddress()
         );
@@ -254,7 +263,7 @@ contract EVVMCafe is EvvmService {
      */
     function withdrawFunds(address to) external onlyOwner {
         // Get the current ETH balance held by the contract
-        uint256 balance = evvm.getBalance(address(this), getEtherAddress());
+        uint256 balance = core.getBalance(address(this), getEtherAddress());
 
         // Transfer all accumulated ETH to the specified address
         makeCaPay(to, getEtherAddress(), balance);
@@ -265,10 +274,10 @@ contract EVVMCafe is EvvmService {
     }
 
     function getAmountOfPrincipalTokenInShop() external view returns (uint256) {
-        return evvm.getBalance(address(this), getPrincipalTokenAddress());
+        return core.getBalance(address(this), getPrincipalTokenAddress());
     }
 
     function getAmountOfEtherInShop() external view returns (uint256) {
-        return evvm.getBalance(address(this), getEtherAddress());
+        return core.getBalance(address(this), getEtherAddress());
     }
 }
