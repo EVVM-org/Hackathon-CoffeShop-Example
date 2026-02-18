@@ -1,5 +1,6 @@
 import {
   BaseService,
+  IAbiFunction,
   IPayData,
   ISigner,
   SignedAction,
@@ -8,6 +9,7 @@ import {
 import EvvmCafeABI from "@/constant/EVVMCafe.json";
 import { OrderCoffeeInputData } from "@/types/cafedata.type";
 import Addresses from "@/constant/address.json";
+import { zeroAddress } from "viem";
 
 /**
  * Custom service for Coffee Shop use case
@@ -16,8 +18,8 @@ export class CoffeeService extends BaseService {
   constructor(signer: ISigner) {
     super({
       signer,
-      address: Addresses.CafeAddress,
-      abi: EvvmCafeABI.abi,
+      address: Addresses.CafeAddress as `0x${string}`,
+      abi: EvvmCafeABI.abi as IAbiFunction[],
       chainId: 11155111,
     });
   }
@@ -40,10 +42,19 @@ export class CoffeeService extends BaseService {
     const evvmId = evvmSignedAction.evvmId;
     const functionName = "orderCoffee";
 
-    const inputs = `${coffeeType},${quantity.toString()},${totalPrice.toString()},${nonce.toString()}`;
-    const message = `${evvmId},${functionName},${inputs}`;
-
-    const signature = await this.signERC191Message(message);
+    const hashPayload = this.buildHashPayload(functionName, {
+      coffeeType,
+      quantity,
+      totalPrice,
+    });
+    const message = this.buildMessageToSign(
+      evvmId,
+      hashPayload,
+      zeroAddress,
+      nonce,
+      true,
+    );
+    const signature = await this.signer.signMessage(message);
 
     return new SignedAction(this, evvmId, functionName, {
       clientAddress: this.signer.address,
@@ -52,10 +63,9 @@ export class CoffeeService extends BaseService {
       totalPrice,
       nonce,
       signature,
-      priorityFee_EVVM: evvmSignedAction.data.priorityFee,
-      nonce_EVVM: evvmSignedAction.data.nonce,
-      priorityFlag_EVVM: evvmSignedAction.data.priorityFlag,
-      signature_EVVM: evvmSignedAction.data.signature,
+      priorityFee: evvmSignedAction.data.priorityFee,
+      noncePay: evvmSignedAction.data.nonce,
+      signaturePay: evvmSignedAction.data.signature,
     });
   }
 }
