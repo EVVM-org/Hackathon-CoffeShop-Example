@@ -39,7 +39,7 @@ export class CoffeeService extends BaseService {
     evvmSignedAction: SignedAction<IPayData>;
   }): Promise<SignedAction<OrderCoffeeInputData>> {
     // const evvmId = await this.getEvvmID();
-    const evvmId = evvmSignedAction.evvmId;
+    const evvmId = await this.getEvvmID();
     const functionName = "orderCoffee";
 
     const hashPayload = this.buildHashPayload(functionName, {
@@ -65,7 +65,7 @@ export class CoffeeService extends BaseService {
       signature,
       priorityFee: evvmSignedAction.data.priorityFee,
       noncePay: evvmSignedAction.data.nonce,
-      signaturePay: evvmSignedAction.data.signature,
+      isAsyncExecPay: evvmSignedAction.data.isAsyncExec,
     });
   }
 }

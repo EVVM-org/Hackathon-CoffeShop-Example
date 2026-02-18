@@ -83,13 +83,13 @@
         { "name": "nonce", "type": "uint256", "internalType": "uint256" },
         { "name": "signature", "type": "bytes", "internalType": "bytes" },
         {
-          "name": "priorityFee_EVVM",
+          "name": "priorityFeePay",
           "type": "uint256",
           "internalType": "uint256"
         },
-        { "name": "nonce_EVVM", "type": "uint256", "internalType": "uint256" },
-        { "name": "priorityFlag_EVVM", "type": "bool", "internalType": "bool" },
-        { "name": "signature_EVVM", "type": "bytes", "internalType": "bytes" }
+        { "name": "noncePay", "type": "uint256", "internalType": "uint256" },
+        { "name": "isAsyncExecPay", "type": "bool", "internalType": "bool" },
+        { "name": "signaturePay", "type": "bytes", "internalType": "bytes" }
       ],
       "outputs": [],
       "stateMutability": "nonpayable"

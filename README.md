@@ -60,10 +60,10 @@ function orderCoffee(
     uint256 totalPrice,
     uint256 nonce,
     bytes memory signature,
-    uint256 priorityFee_EVVM,
-    uint256 nonce_EVVM,
-    bool priorityFlag_EVVM,
-    bytes memory signature_EVVM
+    uint256 priorityFeePay,
+    uint256 noncePay,
+    bool isAsyncExecPay,
+    bytes memory signaturePay
 ) external
 ```
 
@@ -210,7 +210,7 @@ When the coffee shop is registered as an EVVM staker, transaction executors
 ```solidity
 if (evvm.isAddressStaker(address(this))) {
     // Priority fee payment
-    makeCaPay(msg.sender, getEtherAddress(), priorityFee_EVVM);
+    makeCaPay(msg.sender, getEtherAddress(), priorityFeePay);
     
     // Half of EVVM generated rewards
     makeCaPay(msg.sender, getPrincipalTokenAddress(), 
