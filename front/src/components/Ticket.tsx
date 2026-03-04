@@ -101,15 +101,15 @@ export const Ticket: React.FC<TicketProps> = ({
         <div className={styles.receiptLine}>
           <span className={styles.receiptLabel}>Priority:</span>
           <span className={styles.receiptValue}>
-            {paySignedAction.data.priorityFlag ? "Async" : "Sync"}
+            {paySignedAction.data.isAsyncExec ? "Async" : "Sync"}
           </span>
         </div>
 
         <div className={styles.receiptLine}>
           <span className={styles.receiptLabel}>Executor:</span>
           <span className={styles.receiptSignature}>
-            {paySignedAction.data.executor?.slice(0, 10)}...
-            {paySignedAction.data.executor?.slice(-8)}
+            {paySignedAction.data.senderExecutor?.slice(0, 10)}...
+            {paySignedAction.data.senderExecutor?.slice(-8)}
           </span>
         </div>
 
