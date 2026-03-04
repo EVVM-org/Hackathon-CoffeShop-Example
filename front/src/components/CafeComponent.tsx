@@ -1,5 +1,4 @@
 "use client";
-import styles from "./CafeComponent.module.css";
 import Addresses from "@/constant/address.json";
 import { formatEther } from "viem/utils";
 import { generateRandomNumber } from "@/utils/mersenneTwister";
@@ -12,6 +11,24 @@ import { CoffeeService } from "@/lib/services/coffee-service.evvm";
 import { useEvvm } from "@/hooks/useEvvm";
 import { IPayData, SignedAction } from "@evvm/evvm-js";
 import { useAppKitAccount } from "@reown/appkit/react";
+import {
+  Button,
+  Container,
+  Paper,
+  Title,
+  Text,
+  Select,
+  NumberInput,
+  Stack,
+  Group,
+  Divider,
+  Badge,
+  Alert,
+  ActionIcon,
+  Loader,
+} from "@mantine/core";
+import { FaCoffee } from "react-icons/fa";
+import { IoMdRefresh } from "react-icons/io";
 
 export const CafeComponent = () => {
   const { evvmService, signer } = useEvvm();
@@ -58,13 +75,13 @@ export const CafeComponent = () => {
       priorityFlagOnEvvm === "false" ? evvmSyncNonce : evvmAsyncNonce;
 
     const paySignedAction = await evvmService.pay({
-      to: Addresses.CafeAddress,
+      toAddress: Addresses.CafeAddress as `0x${string}`,
       tokenAddress: "0x0000000000000000000000000000000000000000",
       amount: coffePriceMap[coffeeType] * BigInt(quantityCoffee),
       priorityFee: coffePriceMap[coffeeType] / BigInt(1000),
       nonce,
-      priorityFlag: priorityFlagOnEvvm === "true",
-      executor: Addresses.CafeAddress,
+      isAsyncExec: priorityFlagOnEvvm === "true",
+      senderExecutor: Addresses.CafeAddress as `0x${string}`,
     });
 
     const orderCoffeeSignedAction = await coffeeService.orderCoffee({
@@ -83,137 +100,193 @@ export const CafeComponent = () => {
   if (!isConnected) return null;
 
   return (
-    <div>
+    <Container size="md" py="xl">
       {progressHistory === "begin" && (
-        <>
-          <p>Select Coffee Type:</p>
-          <select
-            className={styles.cafeSelect}
-            value={coffeeType}
-            onChange={(e) => setCoffeeType(e.target.value)}
-          >
-            <option value="Fisher Espresso">Fisher Espresso</option>
-            <option value="Virtual Cappuccino">Virtual Cappuccino</option>
-            <option value="Decentralized Latte">Decentralized Latte</option>
-            <option value="Nonce Mocha">Nonce Mocha</option>
-          </select>
+        <Paper shadow="md" radius="lg" p="xl" withBorder>
+          <Stack gap="lg">
+            <Group gap="xs">
+              <FaCoffee size={32} />
+              <Title order={2}>EVVM Café</Title>
+            </Group>
+            
+            <Divider />
 
-          <p>Quantity:</p>
-          <select
-            className={styles.cafeSelect}
-            value={quantityCoffee}
-            onChange={(e) => setQuantityCoffee(Number(e.target.value))}
-          >
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
+            <Select
+              label="Select Coffee Type"
+              placeholder="Choose your coffee"
+              value={coffeeType}
+              onChange={(value) => setCoffeeType(value || "Fisher Espresso")}
+              data={[
+                { value: "Fisher Espresso", label: "☕ Fisher Espresso" },
+                { value: "Virtual Cappuccino", label: "☕ Virtual Cappuccino" },
+                { value: "Decentralized Latte", label: "☕ Decentralized Latte" },
+                { value: "Nonce Mocha", label: "☕ Nonce Mocha" },
+              ]}
+              size="md"
+              allowDeselect={false}
+            />
 
-          <p>
-            Total Price:{" "}
-            {formatEther(coffePriceMap[coffeeType] * BigInt(quantityCoffee))}{" "}
-            ETH
-          </p>
+            <NumberInput
+              label="Quantity"
+              placeholder="Enter quantity"
+              value={quantityCoffee}
+              onChange={(value) => setQuantityCoffee(Number(value))}
+              min={1}
+              max={10}
+              size="md"
+              allowDecimal={false}
+              allowNegative={false}
+            />
 
-          <button onClick={() => setProgressHistory("confirming")}>
-            Confirm Order and Pay
-          </button>
-        </>
+            <Divider />
+
+            <Group justify="space-between" align="center">
+              <Text size="lg" fw={500}>Total Price:</Text>
+              <Badge size="xl" variant="gradient" gradient={{ from: 'orange', to: 'red' }}>
+                {formatEther(coffePriceMap[coffeeType] * BigInt(quantityCoffee))} ETH
+              </Badge>
+            </Group>
+
+            <Button 
+              onClick={() => setProgressHistory("confirming")}
+              size="lg"
+              fullWidth
+              leftSection={<FaCoffee size={20} />}
+            >
+              Confirm Order and Pay
+            </Button>
+          </Stack>
+        </Paper>
       )}
 
       {progressHistory === "confirming" && (
-        <>
-          <p>
-            Price:{" "}
-            {formatEther(coffePriceMap[coffeeType] * BigInt(quantityCoffee))}{" "}
-            ETH
-          </p>
+        <Paper shadow="md" radius="lg" p="xl" withBorder>
+          <Stack gap="lg">
+            <Group gap="xs">
+              <FaCoffee size={32} />
+              <Title order={2}>Confirm Order</Title>
+            </Group>
 
-          <div>
-            Service nonce:{" "}
-            <input
-              type="number"
-              id="nonceInput_Cafe"
-              placeholder="Enter nonce"
-              value={coffeeNonce.toString()}
-              onChange={(e) => setCoffeeNonce(BigInt(e.target.value))}
-            />
-            <button
-              onClick={() => setCoffeeNonce(BigInt(generateRandomNumber()))}
-            >
-              Generate Random Nonce
-            </button>
-          </div>
+            <Divider />
 
-          <p>
-            Priority fee for the transaction:{" "}
-            {formatEther(coffePriceMap[coffeeType] / BigInt(1000))} ETH
-          </p>
+            <Alert variant="light" color="blue" title="Order Summary">
+              <Text size="sm">
+                {coffeeType} × {quantityCoffee}
+              </Text>
+              <Text size="lg" fw={700} mt="xs">
+                Total: {formatEther(coffePriceMap[coffeeType] * BigInt(quantityCoffee))} ETH
+              </Text>
+              <Text size="xs" c="dimmed" mt="xs">
+                Priority fee: {formatEther(coffePriceMap[coffeeType] / BigInt(1000))} ETH
+              </Text>
+            </Alert>
 
-          <div>
-            Using{" "}
-            <select
-              value={priorityFlagOnEvvm}
-              onChange={(e) => setPriorityFlagOnEvvm(e.target.value)}
-            >
-              <option value="false">Sync nonces</option>
-              <option value="true">Async nonces</option>
-            </select>
-            {priorityFlagOnEvvm === "false" ? (
-              <div>
-                {evvmSyncNonce != null ? (
-                  <p>Current Sync Nonce: {evvmSyncNonce?.toString()}</p>
-                ) : (
-                  <p>Loading...</p>
-                )}
-              </div>
-            ) : (
-              <div>
-                <input
-                  type="number"
-                  id="nonceAsyncInput_Pay"
+            <Stack gap="md">
+              <Group gap="xs" align="flex-end">
+                <NumberInput
+                  label="Service Nonce"
                   placeholder="Enter nonce"
-                  value={evvmAsyncNonce.toString()}
-                  onChange={(e) => setEvvmAsyncNonce(BigInt(e.target.value))}
+                  value={coffeeNonce.toString()}
+                  onChange={(value) => setCoffeeNonce(BigInt(value || 0))}
+                  hideControls
+                  flex={1}
                 />
-                <button
-                  onClick={() =>
-                    setEvvmAsyncNonce(BigInt(generateRandomNumber()))
-                  }
+                <ActionIcon 
+                  size="lg" 
+                  variant="filled"
+                  onClick={() => setCoffeeNonce(BigInt(generateRandomNumber()))}
                 >
-                  Generate Random Nonce
-                </button>
-              </div>
-            )}
-          </div>
-          <button onClick={makeSig}>Make Signature and Pay</button>
-        </>
+                  <IoMdRefresh size={18} />
+                </ActionIcon>
+              </Group>
+
+              <Select
+                label="Execution Mode"
+                value={priorityFlagOnEvvm}
+                onChange={(value) => setPriorityFlagOnEvvm(value || "false")}
+                data={[
+                  { value: "false", label: "Sync Nonces" },
+                  { value: "true", label: "Async Nonces" },
+                ]}
+                allowDeselect={false}
+              />
+
+              {priorityFlagOnEvvm === "false" ? (
+                <Alert variant="light" color="cyan">
+                  {evvmSyncNonce != null ? (
+                    <Group gap="xs" align="center">
+                      <Text size="sm" component="span">
+                        Current Sync Nonce:
+                      </Text>
+                      <Badge>{evvmSyncNonce.toString()}</Badge>
+                    </Group>
+                  ) : (
+                    <Group gap="xs">
+                      <Loader size="xs" />
+                      <Text size="sm">Loading nonce...</Text>
+                    </Group>
+                  )}
+                </Alert>
+              ) : (
+                <Group gap="xs" align="flex-end">
+                  <NumberInput
+                    label="Async Nonce"
+                    placeholder="Enter nonce"
+                    value={evvmAsyncNonce.toString()}
+                    onChange={(value) => setEvvmAsyncNonce(BigInt(value || 0))}
+                    hideControls
+                    flex={1}
+                  />
+                  <ActionIcon 
+                    size="lg" 
+                    variant="filled"
+                    onClick={() => setEvvmAsyncNonce(BigInt(generateRandomNumber()))}
+                  >
+                    <IoMdRefresh size={18} />
+                  </ActionIcon>
+                </Group>
+              )}
+            </Stack>
+
+            <Divider />
+
+            <Button 
+              onClick={makeSig}
+              size="lg"
+              fullWidth
+            >
+              Sign and Pay
+            </Button>
+          </Stack>
+        </Paper>
       )}
 
       {paySignedAction &&
         orderCoffeeSignedAction &&
         progressHistory === "signed" && (
-          <>
+          <Stack gap="lg">
             <Ticket
               orderCoffeeSignedAction={orderCoffeeSignedAction}
               paySignedAction={paySignedAction}
             />
 
-            <button onClick={() => setProgressHistory("fishing")}>
+            <Button 
+              onClick={() => setProgressHistory("fishing")}
+              size="lg"
+              fullWidth
+            >
               Send this to the fishing spot
-            </button>
-          </>
+            </Button>
+          </Stack>
         )}
 
       {orderCoffeeSignedAction && progressHistory === "fishing" && (
-        <div>
+        <Paper shadow="md" radius="lg" p="xl" withBorder>
           <VisualExecution
             orderCoffeeSignedAction={orderCoffeeSignedAction.toJSON()}
           />
-        </div>
+        </Paper>
       )}
-    </div>
+    </Container>
   );
 };

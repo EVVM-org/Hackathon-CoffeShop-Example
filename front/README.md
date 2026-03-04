@@ -7,8 +7,8 @@ This is a Next.js project.
 1. Go to [Reown Dashboard](https://dashboard.reown.com) and create a new project.
 2. Copy your `Project ID`
 3. Rename `.env.example` to `.env` and paste your `Project ID` as the value for `NEXT_PUBLIC_PROJECT_ID`
-4. Run `pnpm install` to install dependencies
-5. Run `pnpm run dev` to start the development server
+4. Run `bun install` to install dependencies
+5. Run `bun dev` to start the development server
 
 ## Resources
 
