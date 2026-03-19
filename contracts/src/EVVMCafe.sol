@@ -49,7 +49,8 @@ contract EVVMCafe is EvvmService {
 
     /**
      * @notice Initializes the coffee shop contract with EVVM integration
-     * @param _coreAddress Address of the EVVM virtual blockchain contract for payment processing
+     * @param _coreAddress Address of the EVVM core contract for payment processing
+     * @param _stakingAddress Address of the EVVM staking contract
      * @param _ownerOfShop Address that will have administrative privileges over the shop
      */
     constructor(
@@ -71,6 +72,8 @@ contract EVVMCafe is EvvmService {
      * @param coffeeType Type/name of coffee being ordered (e.g., "Espresso", "Latte")
      * @param quantity Number of coffee units being ordered
      * @param totalPrice Total price to be paid in ETH (in wei)
+     * @param senderExecutor Address of the executor submitting this transaction to EVVM
+     * @param originExecutor Address of the original executor (the fisher who will execute this transaction)
      * @param nonce Unique number to prevent replay attacks (must not be reused)
      * @param isAsyncExec Boolean flag indicating the type of nonce execution (true for async, false for sync)
      * @param signature Client's signature authorizing the coffee order
@@ -80,8 +83,7 @@ contract EVVMCafe is EvvmService {
      *                          (true for async nonce, false for sync nonce)
      * @param signatureEvvm Signature authorizing the EVVM payment transaction
      *
-     * @dev Signature format for client authorization:
-     *      "<evvmID>,orderCoffee,<coffeeType>,<quantity>,<totalPrice>,<nonce>"
+     * @dev Signature format: `{evvmID},{senderExecutor},keccak256(abi.encode("orderCoffee",{coffeeType},{quantity},{totalPrice})),{originExecutor},{nonce},{isAsyncExec}`
      *
      * @dev Reverts with InvalidSignature() if client signature verification fails
      * @dev Reverts with NonceAlreadyUsed() if nonce has been previously used
@@ -133,8 +135,6 @@ contract EVVMCafe is EvvmService {
             isAsyncExec,
             signature
         );
-
-        // Prevent replay attacks by checking if nonce has been used before
 
         /**
          * Pay for the coffee using EVVM virtual blockchain's pay function
@@ -272,14 +272,17 @@ contract EVVMCafe is EvvmService {
         makeCaPay(to, core.getChainHostCoinAddress(), balance);
     }
 
+    /// @notice Returns the shop owner address
     function getOwnerOfShop() external view returns (address) {
         return ownerOfShop;
     }
 
+    /// @notice Returns the principal token (EVVM reward) balance held by this contract
     function getAmountOfPrincipalTokenInShop() external view returns (uint256) {
         return core.getBalance(address(this), getPrincipalTokenAddress());
     }
 
+    /// @notice Returns the ETH balance held by this contract
     function getAmountOfEtherInShop() external view returns (uint256) {
         return core.getBalance(address(this), core.getChainHostCoinAddress());
     }
