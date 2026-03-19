@@ -91,6 +91,7 @@ contract EVVMCafe is EvvmService {
         string memory coffeeType,
         uint256 quantity,
         uint256 totalPrice,
+        address senderExecutor,
         address originExecutor,
         uint256 nonce,
         bool isAsyncExec,
@@ -123,6 +124,7 @@ contract EVVMCafe is EvvmService {
          */
         core.validateAndConsumeNonce(
             user,
+            senderExecutor,
             keccak256(
                 abi.encode("orderCoffee", coffeeType, quantity, totalPrice)
             ),
